@@ -303,7 +303,7 @@ btnRequestRecover.addEventListener('click', async () => {
         }
 
         // Popola la modale
-        modalGiverName.textContent = data.giver;
+        modalGiverName.textContent = `${data.giver} [PIN personale: ${data.userPin}]`;
         modalVictimFullname.textContent = `${data.victim.nome} ${data.victim.cognome}`;
         modalVictimMaglia.textContent = data.victim.tagliaMaglia;
         modalVictimPantaloni.textContent = data.victim.tagliaPantaloni;

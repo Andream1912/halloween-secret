@@ -86,14 +86,15 @@ app.post('/api/register', (req, res) => {
         return res.status(400).json({ error: "Le registrazioni sono chiuse: l'estrazione è già avvenuta!" });
     }
 
-    const { nome, cognome, tagliaMaglia, tagliaPantaloni, note } = req.body;
+    const { nome, cognome, tagliaMaglia, tagliaPantaloni, note, pin } = req.body;
 
-    if (!nome || !cognome || !tagliaMaglia || !tagliaPantaloni) {
-        return res.status(400).json({ error: 'Compila tutti i campi obbligatori (Nome, Cognome, Taglia Maglia, Taglia Pantaloni).' });
+    if (!nome || !cognome || !tagliaMaglia || !tagliaPantaloni || !pin) {
+        return res.status(400).json({ error: 'Compila tutti i campi obbligatori, incluso il PIN Personale Segreto.' });
     }
 
     const trimmedNome = nome.trim();
     const trimmedCognome = cognome.trim();
+    const trimmedPin = pin.trim();
 
     // Controllo duplicati
     const alreadyExists = state.participants.some(
@@ -112,6 +113,7 @@ app.post('/api/register', (req, res) => {
         tagliaMaglia: tagliaMaglia.trim(),
         tagliaPantaloni: tagliaPantaloni.trim(),
         note: (note || '').trim(),
+        pin: trimmedPin,
         createdAt: new Date().toISOString()
     };
 
@@ -128,13 +130,13 @@ app.post('/api/register', (req, res) => {
     });
 });
 
-// 3. Recupera la propria vittima (solo se l'estrazione è avvenuta)
+// 3. Recupera la propria vittima (solo se l'estrazione è avvenuta e con PIN valido)
 app.post('/api/my-victim', (req, res) => {
     if (state.status !== 'drawn') {
         return res.status(400).json({ error: "L'estrazione non è ancora stata avviata dall'amministratore!" });
     }
 
-    const { id, nome, cognome } = req.body;
+    const { id, nome, cognome, pin } = req.body;
 
     let participant = null;
     if (id) {
@@ -148,6 +150,11 @@ app.post('/api/my-victim', (req, res) => {
 
     if (!participant) {
         return res.status(404).json({ error: 'Partecipante non trovato. Verifica di aver inserito correttamente Nome e Cognome.' });
+    }
+
+    // Verifica PIN personale anti-sbirciata!
+    if (!pin || participant.pin !== pin.trim()) {
+        return res.status(401).json({ error: 'PIN Personale non corretto! Non puoi sbirciare la vittima di un altro partecipante.' });
     }
 
     const targetId = state.assignments[participant.id];
@@ -264,6 +271,7 @@ app.post('/api/admin/recover-single', (req, res) => {
     res.json({
         success: true,
         giver: `${participant.nome} ${participant.cognome}`,
+        userPin: participant.pin,
         victim: {
             nome: victim.nome,
             cognome: victim.cognome,

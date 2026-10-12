@@ -2,7 +2,8 @@
 let currentParticipant = {
     id: localStorage.getItem('hw_participant_id') || null,
     nome: localStorage.getItem('hw_participant_nome') || null,
-    cognome: localStorage.getItem('hw_participant_cognome') || null
+    cognome: localStorage.getItem('hw_participant_cognome') || null,
+    pin: localStorage.getItem('hw_participant_pin') || null
 };
 
 let pollingInterval = null;
@@ -20,6 +21,7 @@ const regCognome = document.getElementById('reg-cognome');
 const regMaglia = document.getElementById('reg-maglia');
 const regPantaloni = document.getElementById('reg-pantaloni');
 const regNote = document.getElementById('reg-note');
+const regPin = document.getElementById('reg-pin');
 const registerError = document.getElementById('register-error');
 const btnShowLookup = document.getElementById('btn-show-lookup');
 
@@ -27,6 +29,7 @@ const btnShowLookup = document.getElementById('btn-show-lookup');
 const lookupForm = document.getElementById('lookup-form');
 const lookupNome = document.getElementById('lookup-nome');
 const lookupCognome = document.getElementById('lookup-cognome');
+const lookupPin = document.getElementById('lookup-pin');
 const lookupError = document.getElementById('lookup-error');
 const btnBackToReg = document.getElementById('btn-back-to-reg');
 
@@ -135,6 +138,10 @@ async function fetchMyVictim() {
             return false;
         }
 
+        if (currentParticipant.pin) {
+            payload.pin = currentParticipant.pin;
+        }
+
         const res = await fetch('/api/my-victim', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -151,6 +158,8 @@ async function fetchMyVictim() {
 
             showScreen(screenReveal);
             return true;
+        } else if (res.status === 401) {
+            return { error: data.error || 'PIN Personale non corretto!' };
         }
         return false;
     } catch (err) {
@@ -187,12 +196,20 @@ registerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     registerError.classList.add('hidden');
 
+    const pinVal = regPin.value.trim();
+    if (!pinVal) {
+        registerError.textContent = 'Inserisci un PIN personale segreto.';
+        registerError.classList.remove('hidden');
+        return;
+    }
+
     const payload = {
         nome: regNome.value.trim(),
         cognome: regCognome.value.trim(),
         tagliaMaglia: regMaglia.value,
         tagliaPantaloni: regPantaloni.value.trim(),
-        note: regNote.value.trim()
+        note: regNote.value.trim(),
+        pin: pinVal
     };
 
     try {
@@ -214,10 +231,12 @@ registerForm.addEventListener('submit', async (e) => {
         currentParticipant.id = data.participant.id;
         currentParticipant.nome = data.participant.nome;
         currentParticipant.cognome = data.participant.cognome;
+        currentParticipant.pin = pinVal;
 
         localStorage.setItem('hw_participant_id', currentParticipant.id);
         localStorage.setItem('hw_participant_nome', currentParticipant.nome);
         localStorage.setItem('hw_participant_cognome', currentParticipant.cognome);
+        localStorage.setItem('hw_participant_pin', currentParticipant.pin);
 
         await checkCurrentStatus();
     } catch (err) {
@@ -233,20 +252,33 @@ lookupForm.addEventListener('submit', async (e) => {
 
     const nome = lookupNome.value.trim();
     const cognome = lookupCognome.value.trim();
+    const pinVal = lookupPin.value.trim();
 
-    currentParticipant.nome = nome;
-    currentParticipant.cognome = cognome;
-    currentParticipant.id = null; // Cerchiamo per nome e cognome
-
-    localStorage.setItem('hw_participant_nome', nome);
-    localStorage.setItem('hw_participant_cognome', cognome);
-
-    const gotVictim = await fetchMyVictim();
-    if (gotVictim) {
+    if (!pinVal) {
+        lookupError.textContent = 'Inserisci il PIN Personale che hai scelto all\'iscrizione.';
+        lookupError.classList.remove('hidden');
         return;
     }
 
-    // Se non ha ancora una vittima (perché l'estrazione non è ancora avvenuta o il nome è errato)
+    currentParticipant.nome = nome;
+    currentParticipant.cognome = cognome;
+    currentParticipant.pin = pinVal;
+    currentParticipant.id = null; // Cerchiamo per nome, cognome e PIN
+
+    const result = await fetchMyVictim();
+    if (result === true) {
+        // Salviamo se valido
+        localStorage.setItem('hw_participant_nome', nome);
+        localStorage.setItem('hw_participant_cognome', cognome);
+        localStorage.setItem('hw_participant_pin', pinVal);
+        return;
+    } else if (result && result.error) {
+        lookupError.textContent = result.error;
+        lookupError.classList.remove('hidden');
+        return;
+    }
+
+    // Se l'estrazione non è ancora avvenuta, verifichiamo che esista nei partecipanti
     const statusRes = await fetch('/api/status');
     const statusData = await statusRes.json();
 
@@ -255,6 +287,9 @@ lookupForm.addEventListener('submit', async (e) => {
     );
 
     if (exists) {
+        localStorage.setItem('hw_participant_nome', nome);
+        localStorage.setItem('hw_participant_cognome', cognome);
+        localStorage.setItem('hw_participant_pin', pinVal);
         updateWaitingScreen(statusData);
         showScreen(screenWaiting);
     } else {
