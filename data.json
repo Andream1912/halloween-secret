@@ -1,37 +1,5 @@
 {
-  "status": "drawn",
-  "participants": [
-    {
-      "id": "p_1791767981823_bpwhw",
-      "nome": "Andrea",
-      "cognome": "Marino",
-      "tagliaMaglia": "S",
-      "tagliaPantaloni": "44",
-      "note": "",
-      "createdAt": "2026-10-12T01:19:41.823Z"
-    },
-    {
-      "id": "p_1791768008176_5ana7",
-      "nome": "Luigi",
-      "cognome": "Lallo",
-      "tagliaMaglia": "S",
-      "tagliaPantaloni": "14",
-      "note": "",
-      "createdAt": "2026-10-12T01:20:08.176Z"
-    },
-    {
-      "id": "p_1791768028654_cgjhd",
-      "nome": "ciao",
-      "cognome": "cia",
-      "tagliaMaglia": "S",
-      "tagliaPantaloni": "44",
-      "note": "sdadasd",
-      "createdAt": "2026-10-12T01:20:28.654Z"
-    }
-  ],
-  "assignments": {
-    "p_1791767981823_bpwhw": "p_1791768008176_5ana7",
-    "p_1791768008176_5ana7": "p_1791768028654_cgjhd",
-    "p_1791768028654_cgjhd": "p_1791767981823_bpwhw"
-  }
+  "status": "registration",
+  "participants": [],
+  "assignments": {}
 }
