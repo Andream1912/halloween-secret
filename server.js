@@ -42,30 +42,25 @@ function saveState() {
 
 loadState();
 
-// Algoritmo di Derangement (nessuno pesca se stesso)
+// Algoritmo di Catena ad Anello (Hamiltonian Cycle)
+// Garantisce al 100% una corrispondenza 1:1 sia per numeri PARI che DISPARI:
+// 1. Ognuno fa il regalo a esattamente 1 persona
+// 2. Ognuno riceve il regalo da esattamente 1 persona
+// 3. Nessuno pesca mai se stesso
 function generateDerangement(items) {
     if (items.length < 2) return null;
-    let shuffled = [];
-    let isValid = false;
-    let attempts = 0;
 
-    while (!isValid && attempts < 1000) {
-        attempts++;
-        shuffled = [...items].sort(() => Math.random() - 0.5);
-        isValid = true;
-        for (let i = 0; i < items.length; i++) {
-            if (items[i].id === shuffled[i].id) {
-                isValid = false;
-                break;
-            }
-        }
+    // Fisher-Yates shuffle per mescolare in modo equo e casuale
+    const shuffled = [...items];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
 
-    if (!isValid) return null;
-
     const map = {};
-    for (let i = 0; i < items.length; i++) {
-        map[items[i].id] = shuffled[i].id;
+    for (let i = 0; i < shuffled.length; i++) {
+        const nextIndex = (i + 1) % shuffled.length;
+        map[shuffled[i].id] = shuffled[nextIndex].id;
     }
     return map;
 }
