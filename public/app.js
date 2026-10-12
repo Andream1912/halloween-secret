@@ -77,13 +77,34 @@ async function checkCurrentStatus() {
         const res = await fetch('/api/status');
         const data = await res.json();
 
+        // 1. Se il sorteggio è avvenuto, proviamo a recuperare la vittima
         if (data.status === 'drawn') {
-            // Se il sorteggio è avvenuto, proviamo a recuperare la vittima
             const gotVictim = await fetchMyVictim();
-            if (gotVictim) return;
+            if (gotVictim === true) return;
         }
 
-        // Se non è ancora avvenuto o non è stato ancora associato
+        // 2. Se siamo ancora in fase di registrazione, verifichiamo che l'utente esista DAVVERO sul server!
+        const existsOnServer = data.participants && data.participants.some(p => 
+            (currentParticipant.id && p.id === currentParticipant.id) ||
+            (currentParticipant.nome && currentParticipant.cognome &&
+             p.nome.toLowerCase() === currentParticipant.nome.toLowerCase() &&
+             p.cognome.toLowerCase() === currentParticipant.cognome.toLowerCase())
+        );
+
+        if (!existsOnServer && data.status === 'registration') {
+            // Dati in localStorage obsoleti (es. dopo un reset o su nuovo server pulito)
+            localStorage.removeItem('hw_participant_id');
+            localStorage.removeItem('hw_participant_nome');
+            localStorage.removeItem('hw_participant_cognome');
+            localStorage.removeItem('hw_participant_pin');
+            currentParticipant = { id: null, nome: null, cognome: null, pin: null };
+
+            showScreen(screenRegister);
+            await checkGeneralStatus();
+            return;
+        }
+
+        // Se l'utente è realmente iscritto sul server, mostriamo la sala d'attesa
         updateWaitingScreen(data);
         showScreen(screenWaiting);
     } catch (err) {
@@ -207,6 +228,25 @@ function startPolling() {
 
             // Se siamo in sala d'attesa, aggiorniamo contatori e lista
             if (screenWaiting.classList.contains('active')) {
+                // Se il server è in fase di registrazione ma noi non siamo nell'elenco (es. dopo un reset)
+                const exists = data.participants && data.participants.some(p =>
+                    (currentParticipant.id && p.id === currentParticipant.id) ||
+                    (currentParticipant.nome && currentParticipant.cognome &&
+                     p.nome.toLowerCase() === currentParticipant.nome.toLowerCase() &&
+                     p.cognome.toLowerCase() === currentParticipant.cognome.toLowerCase())
+                );
+
+                if (!exists && data.status === 'registration') {
+                    localStorage.removeItem('hw_participant_id');
+                    localStorage.removeItem('hw_participant_nome');
+                    localStorage.removeItem('hw_participant_cognome');
+                    localStorage.removeItem('hw_participant_pin');
+                    currentParticipant = { id: null, nome: null, cognome: null, pin: null };
+                    showScreen(screenRegister);
+                    await checkGeneralStatus();
+                    return;
+                }
+
                 updateWaitingScreen(data);
 
                 // Se l'admin ha cliccato "PRONTO" e lo stato è passato a 'drawn'
