@@ -117,9 +117,17 @@
                 <div class="cauldron-animation">🧙‍♀️🫧</div>
                 <h2>Sei dentro, <span id="wait-player-name" class="highlight"></span>!</h2>
                 
-                <div class="pulse-badge">
+                <div class="pulse-badge" id="wait-badge">
                     In attesa che l'organizzatore dia il via...
                 </div>
+
+                <div id="wait-drawn-action-box" class="hidden" style="margin: 18px 0;">
+                    <button type="button" id="btn-manual-unlock" class="btn btn-primary btn-block btn-pulse">
+                        🔮 Svela la tua Vittima Ora! 🦇
+                    </button>
+                </div>
+
+                <div id="wait-error-box" class="error-msg hidden" style="margin: 14px 0;"></div>
 
                 <div class="counter-box">
                     <div class="counter-number" id="wait-count">0</div>
@@ -131,11 +139,16 @@
                     <div id="wait-list-chips" class="chips-container"></div>
                 </div>
 
-                <p class="sub-tip">Tieni aperta questa pagina o torna qui più tardi: quando l'organizzatore darà il via, la tua vittima apparirà automaticamente!</p>
+                <p class="sub-tip" id="wait-sub-tip">Tieni aperta questa pagina o torna qui più tardi: quando l'organizzatore darà il via, la tua vittima apparirà automaticamente!</p>
 
-                <button type="button" id="btn-refresh-status" class="btn btn-ghost btn-sm">
-                    Aggiorna adesso 🔄
-                </button>
+                <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 14px;">
+                    <button type="button" id="btn-refresh-status" class="btn btn-ghost btn-sm">
+                        Aggiorna adesso 🔄
+                    </button>
+                    <button type="button" id="btn-re-identify" class="btn btn-ghost btn-sm">
+                        Non trovi la tua carta? Accedi 🔍
+                    </button>
+                </div>
             </div>
         </section>
 

@@ -139,9 +139,12 @@ app.post('/api/my-victim', (req, res) => {
     const { id, nome, cognome, pin } = req.body;
 
     let participant = null;
+    // 1. Cerca per ID
     if (id) {
         participant = state.participants.find(p => p.id === id);
-    } else if (nome && cognome) {
+    }
+    // 2. Se non trovato per ID (es. id resettato o obsoleto), cerca per Nome e Cognome
+    if (!participant && nome && cognome) {
         participant = state.participants.find(
             p => p.nome.toLowerCase() === nome.trim().toLowerCase() &&
                  p.cognome.toLowerCase() === cognome.trim().toLowerCase()
@@ -152,9 +155,14 @@ app.post('/api/my-victim', (req, res) => {
         return res.status(404).json({ error: 'Partecipante non trovato. Verifica di aver inserito correttamente Nome e Cognome.' });
     }
 
-    // Verifica PIN personale anti-sbirciata!
-    if (!pin || participant.pin !== pin.trim()) {
-        return res.status(401).json({ error: 'PIN Personale non corretto! Non puoi sbirciare la vittima di un altro partecipante.' });
+    // Se l'utente accede dal dispositivo originale con cui si è registrato (id coincide),
+    // oppure se non aveva un PIN registrato, consentiamo l'accesso.
+    // Altrimenti (accesso manuale da un altro dispositivo o PIN impostato), verifichiamo il PIN.
+    const isOwnerDevice = (id && participant.id === id);
+    if (!isOwnerDevice && participant.pin) {
+        if (!pin || participant.pin !== pin.trim()) {
+            return res.status(401).json({ error: 'PIN Personale non corretto! Non puoi sbirciare la vittima di un altro partecipante.' });
+        }
     }
 
     const targetId = state.assignments[participant.id];

@@ -124,23 +124,48 @@ function updateWaitingScreen(data) {
             waitListChips.appendChild(chip);
         });
     }
+
+    const waitBadge = document.getElementById('wait-badge');
+    const waitDrawnActionBox = document.getElementById('wait-drawn-action-box');
+    const waitSubTip = document.getElementById('wait-sub-tip');
+
+    if (data.status === 'drawn') {
+        if (waitBadge) {
+            waitBadge.textContent = '🎉 IL SORTEGGIO È STATO EFFETTUATO!';
+            waitBadge.style.color = '#39ff14';
+            waitBadge.style.borderColor = '#39ff14';
+            waitBadge.style.background = 'rgba(57, 255, 20, 0.2)';
+        }
+        if (waitDrawnActionBox) {
+            waitDrawnActionBox.classList.remove('hidden');
+        }
+        if (waitSubTip) {
+            waitSubTip.textContent = 'Tocca il pulsante sopra per scoprire chi hai pescato!';
+            waitSubTip.style.color = '#ff8533';
+            waitSubTip.style.fontWeight = 'bold';
+        }
+    } else {
+        if (waitBadge) {
+            waitBadge.textContent = "In attesa che l'organizzatore dia il via...";
+            waitBadge.style.color = '#df9eff';
+            waitBadge.style.borderColor = 'var(--spooky-purple)';
+            waitBadge.style.background = 'rgba(157, 0, 255, 0.25)';
+        }
+        if (waitDrawnActionBox) {
+            waitDrawnActionBox.classList.add('hidden');
+        }
+    }
 }
 
 // RECUPERA LA PROPRIA VITTIMA
 async function fetchMyVictim() {
     try {
-        const payload = {};
-        if (currentParticipant.id) payload.id = currentParticipant.id;
-        else if (currentParticipant.nome && currentParticipant.cognome) {
-            payload.nome = currentParticipant.nome;
-            payload.cognome = currentParticipant.cognome;
-        } else {
-            return false;
-        }
-
-        if (currentParticipant.pin) {
-            payload.pin = currentParticipant.pin;
-        }
+        const payload = {
+            id: currentParticipant.id,
+            nome: currentParticipant.nome,
+            cognome: currentParticipant.cognome,
+            pin: currentParticipant.pin
+        };
 
         const res = await fetch('/api/my-victim', {
             method: 'POST',
@@ -158,10 +183,14 @@ async function fetchMyVictim() {
 
             showScreen(screenReveal);
             return true;
-        } else if (res.status === 401) {
-            return { error: data.error || 'PIN Personale non corretto!' };
+        } else {
+            const waitErrorBox = document.getElementById('wait-error-box');
+            if (waitErrorBox) {
+                waitErrorBox.textContent = data.error || 'Errore durante lo sblocco.';
+                waitErrorBox.classList.remove('hidden');
+            }
+            return { error: data.error };
         }
-        return false;
     } catch (err) {
         console.error('Errore fetch my victim:', err);
         return false;
@@ -310,6 +339,24 @@ btnBackToReg.addEventListener('click', () => {
 btnRefreshStatus.addEventListener('click', async () => {
     await checkCurrentStatus();
 });
+
+const btnManualUnlock = document.getElementById('btn-manual-unlock');
+if (btnManualUnlock) {
+    btnManualUnlock.addEventListener('click', async () => {
+        const res = await fetchMyVictim();
+        if (res && res.error) {
+            alert(res.error + "\n\nTi reindirizzo alla schermata di accesso per reinserire i tuoi dati e il PIN.");
+            showScreen(screenLookup);
+        }
+    });
+}
+
+const btnReIdentify = document.getElementById('btn-re-identify');
+if (btnReIdentify) {
+    btnReIdentify.addEventListener('click', () => {
+        showScreen(screenLookup);
+    });
+}
 
 // ANIMAZIONE CARTA 3D
 btnFlipReveal.addEventListener('click', () => {
