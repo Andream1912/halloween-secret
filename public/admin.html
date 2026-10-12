@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pannello Organizzatore - Halloween 🧙‍♂️</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="spooky-bg"></div>
+
+    <div class="app-container admin-container">
+        <header class="app-header">
+            <div class="pumpkin-icon">🧙‍♂️</div>
+            <h1 class="glitch-title">Pannello Segreto</h1>
+            <p class="subtitle">Gestione Rito di Halloween (Admin)</p>
+        </header>
+
+        <!-- SEZIONE 1: LOGIN CON PIN -->
+        <section id="admin-login-screen" class="screen active">
+            <div class="card-box">
+                <h2>Accesso Riservato 🔐</h2>
+                <p class="info-text">Inserisci il PIN per gestire i partecipanti e l'estrazione.</p>
+
+                <form id="admin-login-form">
+                    <div class="form-group">
+                        <label for="admin-pin-input">PIN Organizzatore</label>
+                        <input type="password" id="admin-pin-input" required placeholder="Inserisci PIN (es. 1312)" autocomplete="current-password">
+                    </div>
+                    <div id="admin-login-error" class="error-msg hidden"></div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <span>Entra nel Pannello 🚪</span>
+                    </button>
+                    <a href="index.html" class="btn btn-ghost btn-block">Torna all'App Giocatori</a>
+                </form>
+            </div>
+        </section>
+
+        <!-- SEZIONE 2: DASHBOARD ADMIN -->
+        <section id="admin-dashboard-screen" class="screen hidden">
+            <!-- STATO GENERALE -->
+            <div class="card-box">
+                <div class="status-header">
+                    <div>
+                        <span class="badge" id="admin-status-badge">REGISTRAZIONI APERTE</span>
+                        <h2 style="margin-top: 8px;">Partecipanti Iscritti: <span id="admin-count" class="highlight">0</span></h2>
+                    </div>
+                    <button id="btn-admin-refresh" class="btn btn-ghost btn-sm" title="Ricarica dati">🔄</button>
+                </div>
+
+                <div id="admin-draw-notice" class="draw-notice hidden">
+                    🎉 <strong>Il sorteggio è stato effettuato!</strong> Tutti i partecipanti possono ora scoprire la loro vittima dai rispettivi telefoni.
+                </div>
+
+                <!-- PULSANTE AVVIO SORTEGGIO -->
+                <div id="admin-draw-actions" class="draw-actions">
+                    <p class="info-text">Quando tutti i partecipanti si sono iscritti e sei pronto, premi il pulsante qui sotto per avviare il sorteggio segreto:</p>
+                    <button id="btn-start-draw" class="btn btn-primary btn-block btn-pulse">
+                        🎃 AVVIA IL SORTEGGIO (TUTTI PRONTI!) ⚡
+                    </button>
+                    <p class="sub-tip" id="draw-req-tip">⚠️ Servono almeno 3 partecipanti per poter avviare l'estrazione.</p>
+                </div>
+            </div>
+
+            <!-- LISTA PARTECIPANTI REGISTRATI -->
+            <div class="card-box">
+                <h3>Elenco Iscritti e Taglie</h3>
+                <p class="info-text">Puoi controllare che tutti abbiano inserito correttamente le taglie prima di avviare il rito.</p>
+
+                <div id="admin-participants-table-wrapper" class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Nome & Cognome</th>
+                                <th>👕 Maglia</th>
+                                <th>👖 Pantaloni</th>
+                                <th>Note</th>
+                                <th id="th-action">Azione</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-participants-tbody">
+                            <tr><td colspan="5" class="text-center">Nessun partecipante registrato</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SEZIONE RECUPERO D'EMERGENZA (NO SPOILER ACCIDENTALE) -->
+            <div class="card-box" id="admin-emergency-recovery-box">
+                <h3>🆘 Recupero per chi ha dimenticato</h3>
+                <p class="info-text">
+                    <strong>Zero spoiler garantito:</strong> gli abbinamenti NON sono mai mostrati tutti insieme in una tabella aperta.
+                    Se un amico ha perso il telefono o ha dimenticato chi ha pescato, puoi svelare in modo protetto <em>solo la sua specifica vittima</em>.
+                </p>
+
+                <div id="recovery-not-drawn-msg" class="info-box">
+                    L'estrazione non è ancora avvenuta. Questa funzione sarà disponibile appena avvierai il sorteggio.
+                </div>
+
+                <div id="recovery-active-box" class="hidden">
+                    <div class="form-group">
+                        <label for="recovery-select-user">Chi ha dimenticato la sua vittima?</label>
+                        <select id="recovery-select-user">
+                            <option value="" disabled selected>Seleziona partecipante...</option>
+                        </select>
+                    </div>
+
+                    <button type="button" id="btn-request-recover" class="btn btn-secondary btn-block">
+                        Svela SOLO la vittima di questa persona 👁️
+                    </button>
+                </div>
+            </div>
+
+            <!-- RESET EVENTO -->
+            <div class="card-box danger-zone">
+                <h4>Zona Pericolo</h4>
+                <p class="info-text">Vuoi azzerare tutto e iniziare da capo un nuovo sorteggio?</p>
+                <button type="button" id="btn-admin-reset" class="btn btn-danger btn-sm">
+                    ⚠️ Azzera Evento e Iscritti
+                </button>
+            </div>
+
+            <div class="text-center" style="margin-top: 20px;">
+                <a href="index.html" class="btn btn-ghost btn-sm">Torna alla vista Giocatori</a>
+            </div>
+        </section>
+    </div>
+
+    <!-- MODALE SICURA PER RECUPERO SINGOLA VITTIMA (CON PROTEZIONE BLUR / ZERO SPOILER) -->
+    <div id="recovery-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <h3>👁️ Recupero Singolo Abbinamento</h3>
+            <p class="modal-warning">
+                Stai per visualizzare a chi deve fare il regalo: <strong id="modal-giver-name" class="highlight">Persona</strong>.
+            </p>
+
+            <div class="blurred-reveal-zone" id="blur-zone">
+                <div class="blur-overlay" id="blur-overlay-btn">
+                    <span>⚠️ Clicca qui per rimuovere la sfocatura e leggere</span>
+                </div>
+                <div class="revealed-content">
+                    <p class="label">DEVE FARE IL REGALO A:</p>
+                    <h2 id="modal-victim-fullname" class="highlight" style="font-size: 1.8rem; margin: 10px 0;">Vittima</h2>
+                    <div class="modal-tags">
+                        <div>👕 Maglia: <strong id="modal-victim-maglia">-</strong></div>
+                        <div>👖 Pantaloni: <strong id="modal-victim-pantaloni">-</strong></div>
+                    </div>
+                    <div id="modal-victim-note-box" style="margin-top: 10px;">
+                        <span style="font-size: 0.85rem; color: #bbb;">Note:</span>
+                        <p id="modal-victim-note" style="font-style: italic; color: #fff;">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" id="btn-close-modal" class="btn btn-primary btn-block">
+                    Chiudi e Rinascondi Tutto 🔒
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

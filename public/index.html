@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Estrazione Segreta di Halloween 🎃</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="spooky-bg"></div>
+
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="pumpkin-icon">🎃</div>
+            <h1 class="glitch-title">Secret Halloween</h1>
+            <p class="subtitle">L'estrazione spettrale delle vittime</p>
+        </header>
+
+        <!-- SCHERMATA 1: REGISTRAZIONE -->
+        <section id="screen-register" class="screen active">
+            <div class="card-box">
+                <h2>Iscriviti al Sorteggio 👻</h2>
+                <p class="info-text">Inserisci i tuoi dati e le tue taglie. Una volta che l'organizzatore darà il via, scoprirai a chi dovrai fare il regalo!</p>
+
+                <form id="register-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="reg-nome">Nome *</label>
+                            <input type="text" id="reg-nome" required placeholder="Es. Marco">
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-cognome">Cognome *</label>
+                            <input type="text" id="reg-cognome" required placeholder="Es. Rossi">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="reg-maglia">Taglia Maglia *</label>
+                            <select id="reg-maglia" required>
+                                <option value="" disabled selected>Seleziona...</option>
+                                <option value="XS">XS</option>
+                                <option value="S">S</option>
+                                <option value="M">M</option>
+                                <option value="L">L</option>
+                                <option value="XL">XL</option>
+                                <option value="XXL">XXL</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-pantaloni">Taglia Pantaloni *</label>
+                            <input type="text" id="reg-pantaloni" required placeholder="Es. 42 / 44 / M">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reg-note">Note / Preferenze (facoltativo)</label>
+                        <textarea id="reg-note" rows="2" placeholder="Es. Preferisco maglie larghe, adoro le caramelle gommose..."></textarea>
+                    </div>
+
+                    <div id="register-error" class="error-msg hidden"></div>
+
+                    <button type="submit" id="btn-submit-reg" class="btn btn-primary btn-block">
+                        <span>Partecipa al Rito 🦇</span>
+                    </button>
+                </form>
+
+                <div class="alt-action">
+                    <button type="button" id="btn-show-lookup" class="link-btn">
+                        Sei già registrato? Clicca qui per recuperare la tua carta 🔍
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCHERMATA RECUPERO PER PARTECIPANTE ESISTENTE -->
+        <section id="screen-lookup" class="screen hidden">
+            <div class="card-box">
+                <h2>Bentornato! 🕵️‍♂️</h2>
+                <p class="info-text">Inserisci il tuo Nome e Cognome per ritrovare la tua vittima o controllare lo stato.</p>
+
+                <form id="lookup-form">
+                    <div class="form-group">
+                        <label for="lookup-nome">Nome</label>
+                        <input type="text" id="lookup-nome" required placeholder="Il tuo nome">
+                    </div>
+                    <div class="form-group">
+                        <label for="lookup-cognome">Cognome</label>
+                        <input type="text" id="lookup-cognome" required placeholder="Il tuo cognome">
+                    </div>
+                    <div id="lookup-error" class="error-msg hidden"></div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <span>Verifica Stato 🔮</span>
+                    </button>
+                    <button type="button" id="btn-back-to-reg" class="btn btn-ghost btn-block">
+                        Torna all'iscrizione
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- SCHERMATA 2: SALA D'ATTESA -->
+        <section id="screen-waiting" class="screen hidden">
+            <div class="card-box text-center">
+                <div class="cauldron-animation">🧙‍♀️🫧</div>
+                <h2>Sei dentro, <span id="wait-player-name" class="highlight"></span>!</h2>
+                
+                <div class="pulse-badge">
+                    In attesa che l'organizzatore dia il via...
+                </div>
+
+                <div class="counter-box">
+                    <div class="counter-number" id="wait-count">0</div>
+                    <div class="counter-label">Vittime attualmente radunate</div>
+                </div>
+
+                <div class="waiting-list-preview">
+                    <h4>Partecipanti in attesa:</h4>
+                    <div id="wait-list-chips" class="chips-container"></div>
+                </div>
+
+                <p class="sub-tip">Tieni aperta questa pagina o torna qui più tardi: quando l'organizzatore darà il via, la tua vittima apparirà automaticamente!</p>
+
+                <button type="button" id="btn-refresh-status" class="btn btn-ghost btn-sm">
+                    Aggiorna adesso 🔄
+                </button>
+            </div>
+        </section>
+
+        <!-- SCHERMATA 3: LA RIVELAZIONE DELLA VITTIMA -->
+        <section id="screen-reveal" class="screen hidden">
+            <div class="card-box text-center">
+                <h2>Il Sorteggio è Avvenuto! ⚡</h2>
+                <p class="warning-box">
+                    👀 <strong>Occhio a non farti sbirciare!</strong><br>
+                    Assicurati che nessuno stia guardando il tuo schermo prima di girare la carta.
+                </p>
+
+                <!-- CARTA 3D FLIP -->
+                <div class="flip-card-container">
+                    <div class="flip-card" id="victim-flip-card">
+                        <!-- FRONTE CARTA (COPERTO) -->
+                        <div class="flip-card-front">
+                            <div class="card-skull">💀</div>
+                            <h3>La Tua Vittima</h3>
+                            <p>Tocca per svelare l'identità segreta</p>
+                            <button type="button" class="btn btn-primary" id="btn-flip-reveal">
+                                Svela Vittima 🦇
+                            </button>
+                        </div>
+
+                        <!-- RETRO CARTA (SVELATO) -->
+                        <div class="flip-card-back">
+                            <span class="badge-target">LA TUA VITTIMA È:</span>
+                            <h2 id="victim-fullname" class="victim-title">Nome Cognome</h2>
+
+                            <div class="victim-details">
+                                <div class="detail-item">
+                                    <span class="detail-icon">👕</span>
+                                    <div class="detail-text">
+                                        <span class="detail-label">Taglia Maglia:</span>
+                                        <strong id="victim-maglia" class="highlight">-</strong>
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-icon">👖</span>
+                                    <div class="detail-text">
+                                        <span class="detail-label">Taglia Pantaloni:</span>
+                                        <strong id="victim-pantaloni" class="highlight">-</strong>
+                                    </div>
+                                </div>
+                                <div class="detail-item note-item" id="victim-note-container">
+                                    <span class="detail-icon">📝</span>
+                                    <div class="detail-text">
+                                        <span class="detail-label">Note / Desideri:</span>
+                                        <p id="victim-note" class="victim-note-content">Nessuna nota</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn btn-ghost btn-sm" id="btn-flip-hide">
+                                🙈 Copri di nuovo la carta
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="secret-reminder">Mantieni il segreto fino alla festa! 🤫</p>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="app-footer">
+            <a href="admin.html" class="admin-link">Area Organizzatore (Admin) 🧙‍♂️</a>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

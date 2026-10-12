@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estrazione di Halloween</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎃 Sorteggio Spaventoso 👻</h1>
+        </header>
+
+        <!-- Fase 1: Inserimento Nomi -->
+        <main id="phase-input" class="phase">
+            <p>Inserisci i nomi delle vittime... ehm, dei partecipanti!</p>
+            <div class="input-group">
+                <input type="text" id="name-input" placeholder="Nome partecipante">
+                <button id="add-btn">Aggiungi</button>
+            </div>
+            <ul id="names-list"></ul>
+            <button id="start-btn" class="hidden">Inizia l'Estrazione!</button>
+        </main>
+
+        <!-- Fase 2: Estrazione Turni -->
+        <main id="phase-draw" class="phase hidden">
+            <h2 id="current-turn">È il turno di: <span id="drawer-name" class="highlight"></span></h2>
+            <p class="warning">Assicurati che ci sia solo <span id="drawer-name-inline"></span> a guardare lo schermo!</p>
+            
+            <div class="card">
+                <div class="card-inner" id="card-inner">
+                    <div class="card-front">
+                        <button id="reveal-btn" class="big-btn">Rivela Vittima 🦇</button>
+                    </div>
+                    <div class="card-back">
+                        <h3>Devi fare un regalo/scherzo a:</h3>
+                        <p id="target-name" class="highlight target">???</p>
+                        <button id="next-btn" class="big-btn secondary">Nascondi e passa al prossimo</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Fase 3: Fine -->
+        <main id="phase-end" class="phase hidden">
+            <h2>🦇 Estrazione Completata! 🦇</h2>
+            <p>Tutti hanno la loro vittima. Buona fortuna!</p>
+            <div class="results-container">
+                <table id="results-table">
+                    <thead>
+                        <tr>
+                            <th>Partecipante</th>
+                            <th>Vittima 👻</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-tbody"></tbody>
+                </table>
+            </div>
+            <button id="restart-btn" class="secondary">Ricomincia</button>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
