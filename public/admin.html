@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pannello Organizzatore - Halloween 🧙‍♂️</title>
+    <title>Secret Halloween</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
@@ -12,9 +12,9 @@
 
     <div class="app-container admin-container">
         <header class="app-header">
-            <div class="pumpkin-icon">🧙‍♂️</div>
-            <h1 class="glitch-title">Pannello Segreto</h1>
-            <p class="subtitle">Gestione Rito di Halloween (Admin)</p>
+            <div class="pumpkin-icon">🎃</div>
+            <h1 class="glitch-title">Secret Halloween</h1>
+            <p class="subtitle">Pannello Organizzatore</p>
         </header>
 
         <!-- SEZIONE 1: LOGIN CON PIN -->
@@ -87,27 +87,28 @@
             </div>
 
             <!-- SEZIONE RECUPERO D'EMERGENZA (NO SPOILER ACCIDENTALE) -->
+            <!-- SEZIONE RECUPERO PIN (ZERO SPOILER ASSOLUTO) -->
             <div class="card-box" id="admin-emergency-recovery-box">
-                <h3>🆘 Recupero per chi ha dimenticato</h3>
+                <h3>🔑 Recupero PIN per chi ha dimenticato</h3>
                 <p class="info-text">
-                    <strong>Zero spoiler garantito:</strong> gli abbinamenti NON sono mai mostrati tutti insieme in una tabella aperta.
-                    Se un amico ha perso il telefono o ha dimenticato chi ha pescato, puoi svelare in modo protetto <em>solo la sua specifica vittima</em>.
+                    <strong>Zero spoiler garantito:</strong> l'abbinamento segreto non viene MAI mostrato all'organizzatore!
+                    Se un amico dimentica il suo codice, puoi visualizzare il suo PIN personale e comunicarglielo, così potrà sbloccare la sua carta in segreto dal suo telefono.
                 </p>
 
                 <div id="recovery-not-drawn-msg" class="info-box">
-                    L'estrazione non è ancora avvenuta. Questa funzione sarà disponibile appena avvierai il sorteggio.
+                    Questa funzione sarà attiva non appena avrai partecipanti registrati.
                 </div>
 
                 <div id="recovery-active-box" class="hidden">
                     <div class="form-group">
-                        <label for="recovery-select-user">Chi ha dimenticato la sua vittima?</label>
+                        <label for="recovery-select-user">Chi ha dimenticato il suo PIN?</label>
                         <select id="recovery-select-user">
                             <option value="" disabled selected>Seleziona partecipante...</option>
                         </select>
                     </div>
 
                     <button type="button" id="btn-request-recover" class="btn btn-secondary btn-block">
-                        Svela SOLO la vittima di questa persona 👁️
+                        Recupera il PIN Personale 🔑
                     </button>
                 </div>
             </div>
@@ -127,35 +128,23 @@
         </section>
     </div>
 
-    <!-- MODALE SICURA PER RECUPERO SINGOLA VITTIMA (CON PROTEZIONE BLUR / ZERO SPOILER) -->
+    <!-- MODALE SICURA PER RECUPERO PIN PERSONALE (NESSUNA VITTIMA MOSTRATA) -->
     <div id="recovery-modal" class="modal-overlay hidden">
         <div class="modal-card">
-            <h3>👁️ Recupero Singolo Abbinamento</h3>
+            <h3>🔑 PIN Personale Recuperato</h3>
             <p class="modal-warning">
-                Stai per visualizzare a chi deve fare il regalo: <strong id="modal-giver-name" class="highlight">Persona</strong>.
+                Partecipante: <strong id="modal-giver-name" class="highlight">Persona</strong>
             </p>
 
-            <div class="blurred-reveal-zone" id="blur-zone">
-                <div class="blur-overlay" id="blur-overlay-btn">
-                    <span>⚠️ Clicca qui per rimuovere la sfocatura e leggere</span>
-                </div>
-                <div class="revealed-content">
-                    <p class="label">DEVE FARE IL REGALO A:</p>
-                    <h2 id="modal-victim-fullname" class="highlight" style="font-size: 1.8rem; margin: 10px 0;">Vittima</h2>
-                    <div class="modal-tags">
-                        <div>👕 Maglia: <strong id="modal-victim-maglia">-</strong></div>
-                        <div>👖 Pantaloni: <strong id="modal-victim-pantaloni">-</strong></div>
-                    </div>
-                    <div id="modal-victim-note-box" style="margin-top: 10px;">
-                        <span style="font-size: 0.85rem; color: #bbb;">Note:</span>
-                        <p id="modal-victim-note" style="font-style: italic; color: #fff;">-</p>
-                    </div>
-                </div>
+            <div style="background: rgba(0, 0, 0, 0.6); border: 2px solid var(--primary-orange); border-radius: 14px; padding: 22px 16px; margin: 20px 0;">
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 8px;">IL SUO PIN SEGRETO È:</p>
+                <div id="modal-user-pin" style="font-family: var(--font-heading); font-size: 2.8rem; color: var(--primary-orange); letter-spacing: 4px;">----</div>
+                <small style="color: #bbb; display: block; margin-top: 10px; font-size: 0.8rem;">Comunica questo PIN al partecipante affinché possa sbloccare la sua carta dal suo telefono.</small>
             </div>
 
             <div class="modal-actions">
                 <button type="button" id="btn-close-modal" class="btn btn-primary btn-block">
-                    Chiudi e Rinascondi Tutto 🔒
+                    Chiudi Finestra 🔒
                 </button>
             </div>
         </div>

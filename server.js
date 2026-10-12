@@ -269,24 +269,10 @@ app.post('/api/admin/recover-single', (req, res) => {
         return res.status(404).json({ error: 'Partecipante selezionato non trovato.' });
     }
 
-    const targetId = state.assignments[participantId];
-    const victim = state.participants.find(p => p.id === targetId);
-
-    if (!victim) {
-        return res.status(404).json({ error: 'Abbinamento non trovato per questo partecipante.' });
-    }
-
     res.json({
         success: true,
         giver: `${participant.nome} ${participant.cognome}`,
-        userPin: participant.pin,
-        victim: {
-            nome: victim.nome,
-            cognome: victim.cognome,
-            tagliaMaglia: victim.tagliaMaglia,
-            tagliaPantaloni: victim.tagliaPantaloni,
-            note: victim.note
-        }
+        userPin: participant.pin || 'Nessun PIN impostato'
     });
 });
 

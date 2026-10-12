@@ -260,14 +260,36 @@ function startPolling() {
     }, 3500);
 }
 
+// Gestione Selezione Taglia Maglia tramite Chips
+const sizeChips = document.querySelectorAll('.size-chip');
+sizeChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+        sizeChips.forEach(c => c.classList.remove('selected'));
+        chip.classList.add('selected');
+        regMaglia.value = chip.dataset.val;
+    });
+});
+
 // GESTIONE REGISTRAZIONE
 registerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     registerError.classList.add('hidden');
 
+    if (!regMaglia.value) {
+        registerError.textContent = 'Seleziona la tua taglia di maglia/felpa toccando una delle opzioni.';
+        registerError.classList.remove('hidden');
+        return;
+    }
+
+    if (!regPantaloni.value) {
+        registerError.textContent = 'Seleziona la tua taglia italiana di pantaloni dal menu.';
+        registerError.classList.remove('hidden');
+        return;
+    }
+
     const pinVal = regPin.value.trim();
     if (!pinVal) {
-        registerError.textContent = 'Inserisci un PIN personale segreto.';
+        registerError.textContent = 'Inserisci un PIN personale segreto per proteggere la tua carta.';
         registerError.classList.remove('hidden');
         return;
     }
@@ -276,7 +298,7 @@ registerForm.addEventListener('submit', async (e) => {
         nome: regNome.value.trim(),
         cognome: regCognome.value.trim(),
         tagliaMaglia: regMaglia.value,
-        tagliaPantaloni: regPantaloni.value.trim(),
+        tagliaPantaloni: regPantaloni.value,
         note: regNote.value.trim(),
         pin: pinVal
     };

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Estrazione Segreta di Halloween 🎃</title>
+    <title>Secret Halloween</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
@@ -15,7 +15,6 @@
         <header class="app-header">
             <div class="pumpkin-icon">🎃</div>
             <h1 class="glitch-title">Secret Halloween</h1>
-            <p class="subtitle">L'estrazione spettrale delle vittime</p>
         </header>
 
         <!-- SCHERMATA 1: REGISTRAZIONE -->
@@ -36,23 +35,37 @@
                         </div>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="reg-maglia">Taglia Maglia *</label>
-                            <select id="reg-maglia" required>
-                                <option value="" disabled selected>Seleziona...</option>
-                                <option value="XS">XS</option>
-                                <option value="S">S</option>
-                                <option value="M">M</option>
-                                <option value="L">L</option>
-                                <option value="XL">XL</option>
-                                <option value="XXL">XXL</option>
-                            </select>
+                    <!-- TAGLIA MAGLIA CON PILLOLE SELEZIONABILI -->
+                    <div class="form-group">
+                        <label>Taglia Maglia / Felpa *</label>
+                        <div class="size-chips-grid" id="maglia-chips">
+                            <button type="button" class="size-chip" data-val="XS">XS</button>
+                            <button type="button" class="size-chip" data-val="S">S</button>
+                            <button type="button" class="size-chip" data-val="M">M</button>
+                            <button type="button" class="size-chip" data-val="L">L</button>
+                            <button type="button" class="size-chip" data-val="XL">XL</button>
+                            <button type="button" class="size-chip" data-val="XXL">XXL</button>
+                            <button type="button" class="size-chip" data-val="3XL">3XL</button>
                         </div>
-                        <div class="form-group">
-                            <label for="reg-pantaloni">Taglia Pantaloni *</label>
-                            <input type="text" id="reg-pantaloni" required placeholder="Es. 42 / 44 / M">
-                        </div>
+                        <input type="hidden" id="reg-maglia" required>
+                    </div>
+
+                    <!-- TAGLIA PANTALONI ITALIANA -->
+                    <div class="form-group">
+                        <label for="reg-pantaloni">Taglia Pantaloni (Standard Italiano) *</label>
+                        <select id="reg-pantaloni" required>
+                            <option value="" disabled selected>Seleziona la tua taglia italiana...</option>
+                            <option value="38 IT">38 IT (XS)</option>
+                            <option value="40 IT">40 IT (S)</option>
+                            <option value="42 IT">42 IT (S/M)</option>
+                            <option value="44 IT">44 IT (M)</option>
+                            <option value="46 IT">46 IT (M/L)</option>
+                            <option value="48 IT">48 IT (L)</option>
+                            <option value="50 IT">50 IT (L/XL)</option>
+                            <option value="52 IT">52 IT (XL)</option>
+                            <option value="54 IT">54 IT (XXL)</option>
+                            <option value="56 IT">56 IT (3XL)</option>
+                        </select>
                     </div>
 
                     <div class="form-group">

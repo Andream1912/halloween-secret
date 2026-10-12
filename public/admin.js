@@ -280,7 +280,7 @@ function populateRecoverySelect(participants) {
     });
 }
 
-// RECUPERO SINGOLA VITTIMA (ZERO SPOILER CON MODALE E SFOCATURA)
+// RECUPERO PIN PERSONALE (ZERO SPOILER ASSOLUTO)
 btnRequestRecover.addEventListener('click', async () => {
     const participantId = recoverySelectUser.value;
     if (!participantId) {
@@ -302,29 +302,21 @@ btnRequestRecover.addEventListener('click', async () => {
             return;
         }
 
-        // Popola la modale
-        modalGiverName.textContent = `${data.giver} [PIN personale: ${data.userPin}]`;
-        modalVictimFullname.textContent = `${data.victim.nome} ${data.victim.cognome}`;
-        modalVictimMaglia.textContent = data.victim.tagliaMaglia;
-        modalVictimPantaloni.textContent = data.victim.tagliaPantaloni;
-        modalVictimNote.textContent = data.victim.note || 'Nessuna nota';
+        // Popola la modale mostrando solo il PIN del partecipante
+        modalGiverName.textContent = data.giver;
+        const modalUserPin = document.getElementById('modal-user-pin');
+        if (modalUserPin) {
+            modalUserPin.textContent = data.userPin;
+        }
 
-        // Resetta la sfocatura (deve essere sfocato all'apertura per evitare spoiler)
-        blurZone.classList.remove('unblurred');
         recoveryModal.classList.remove('hidden');
     } catch (err) {
         alert('Errore di connessione');
     }
 });
 
-// CLICCA PER TOGLIERE LA SFOCATURA
-blurOverlayBtn.addEventListener('click', () => {
-    blurZone.classList.add('unblurred');
-});
-
 // CHIUDI MODALE
 btnCloseModal.addEventListener('click', () => {
-    blurZone.classList.remove('unblurred');
     recoveryModal.classList.add('hidden');
 });
 
