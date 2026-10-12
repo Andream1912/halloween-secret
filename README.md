@@ -23,7 +23,7 @@ Web application interattiva a tema Halloween (stile Secret Santa / Babbo Natale 
    - Se un giocatore ricarica la pagina o rientra il giorno dopo, la carta viene recuperata automaticamente!
 
 4. **Pannello Organizzatore (Admin):**
-   - Accesso protetto da PIN (predefinito: `1312`).
+   - Accesso protetto da PIN segreto dell'organizzatore.
    - Visualizza l'elenco dei registrati e le loro taglie.
    - Possibilità di rimuovere un iscritto prima dell'avvio.
    - Pulsante: **"🎃 AVVIA IL SORTEGGIO (TUTTI PRONTI!)"** (algoritmo matematico di derangement che assicura che nessuno peschi se stesso).
@@ -41,7 +41,7 @@ cd /Users/andreamarino/Desktop/halloween
 npm start
 ```
 - App Partecipanti: `http://localhost:3000`
-- Pannello Admin: `http://localhost:3000/admin.html` (PIN: `1312`)
+- Pannello Admin: `http://localhost:3005/admin.html`
 
 ---
 

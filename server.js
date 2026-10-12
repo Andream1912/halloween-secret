@@ -5,7 +5,7 @@ const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3005;
-const ADMIN_PIN = process.env.ADMIN_PIN || '1312';
+const ADMIN_PIN = process.env.ADMIN_PIN || '1770';
 const DATA_FILE = path.join(__dirname, 'data.json');
 
 app.use(cors());
