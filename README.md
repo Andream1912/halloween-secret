@@ -47,16 +47,19 @@ npm start
 
 ## 🌐 Come pubblicarlo GRATIS su Internet (per gli amici da casa loro)
 
-### Metodo 1: Render.com (Consigliato, 100% Gratuito per sempre)
-1. Vai su [render.com](https://render.com) e crea un account gratuito.
-2. Crea un repository GitHub privato o pubblico e carica questa cartella `halloween`.
-3. Su Render clicca su **New +** ➔ **Web Service**.
-4. Collega il tuo repository GitHub.
-5. Imposta:
-   - **Build Command**: `npm install`
-   - **Start Command**: `node server.js`
-   - **Instance Type**: `Free`
-6. Clicca **Deploy**: in 1 minuto avrai un link pubblico HTTPS (es. `https://secret-halloween.onrender.com`) da inviare a tutti su WhatsApp!
+### Metodo 1: Render.com (Consigliato, 100% Gratuito)
+1. Vai su [render.com](https://render.com) e accedi con GitHub.
+2. Collega il repository `halloween-secret` come **Web Service** (`npm install` e `node server.js`).
+3. **Per rendere i dati persistenti (evitare reset):**
+   - Nella dashboard di Render clicca su **New +** ➔ **PostgreSQL**.
+   - Dai un nome al database (es. `halloween-db`) e scegli il piano **Free**.
+   - Clicca **Create Database**.
+   - Una volta creato, copia il valore di **Internal Database URL** (oppure External Database URL).
+   - Torna nel tuo Web Service `halloween-secret` ➔ scheda **Environment**.
+   - Aggiungi una variabile d'ambiente:
+     - Chiave: `DATABASE_URL`
+     - Valore: incollaci l'URL copiato del database.
+   - Clicca **Save Changes**: da questo momento le registrazioni e i sorteggi saranno salvati per sempre nel database cloud protetto!
 
 ### Metodo 2: Glitch.com (Ancora più veloce, senza Git)
 1. Vai su [glitch.com](https://glitch.com).

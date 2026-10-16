@@ -92,12 +92,10 @@ async function checkCurrentStatus() {
         );
 
         if (!existsOnServer && data.status === 'registration') {
-            // Dati in localStorage obsoleti (es. dopo un reset o su nuovo server pulito)
-            localStorage.removeItem('hw_participant_id');
-            localStorage.removeItem('hw_participant_nome');
-            localStorage.removeItem('hw_participant_cognome');
-            localStorage.removeItem('hw_participant_pin');
-            currentParticipant = { id: null, nome: null, cognome: null, pin: null };
+            // Se non siamo presenti sul server ma abbiamo dati salvati, precompiliamo il form senza cancellare nulla
+            if (currentParticipant.nome && regNome) regNome.value = currentParticipant.nome;
+            if (currentParticipant.cognome && regCognome) regCognome.value = currentParticipant.cognome;
+            if (currentParticipant.pin && regPin) regPin.value = currentParticipant.pin;
 
             showScreen(screenRegister);
             await checkGeneralStatus();
@@ -237,11 +235,9 @@ function startPolling() {
                 );
 
                 if (!exists && data.status === 'registration') {
-                    localStorage.removeItem('hw_participant_id');
-                    localStorage.removeItem('hw_participant_nome');
-                    localStorage.removeItem('hw_participant_cognome');
-                    localStorage.removeItem('hw_participant_pin');
-                    currentParticipant = { id: null, nome: null, cognome: null, pin: null };
+                    if (currentParticipant.nome && regNome) regNome.value = currentParticipant.nome;
+                    if (currentParticipant.cognome && regCognome) regCognome.value = currentParticipant.cognome;
+                    if (currentParticipant.pin && regPin) regPin.value = currentParticipant.pin;
                     showScreen(screenRegister);
                     await checkGeneralStatus();
                     return;

@@ -3,14 +3,29 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 
+const { Pool } = require('pg');
+
 const app = express();
 const PORT = process.env.PORT || 3005;
 const ADMIN_PIN = process.env.ADMIN_PIN || '1770';
 const DATA_FILE = path.join(__dirname, 'data.json');
+const DATABASE_URL = process.env.DATABASE_URL;
 
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Database PostgreSQL Pool (se configurato su Render / Cloud)
+let dbPool = null;
+if (DATABASE_URL) {
+    console.log('[Database] Rilevato DATABASE_URL, connessione a PostgreSQL in corso...');
+    dbPool = new Pool({
+        connectionString: DATABASE_URL,
+        ssl: DATABASE_URL.includes('localhost') ? false : { rejectUnauthorized: false }
+    });
+} else {
+    console.log('[Database] Nessun DATABASE_URL trovato, uso archiviazione locale su file (data.json).');
+}
 
 // Stato iniziale
 let state = {
@@ -19,28 +34,73 @@ let state = {
     assignments: {} // { [participantId]: targetParticipantId }
 };
 
-// Carica dati esistenti se presenti
-function loadState() {
+// Inizializza e carica stato (da PostgreSQL o file)
+async function initState() {
+    // 1. Prova prima da file locale come baseline
     try {
         if (fs.existsSync(DATA_FILE)) {
             const raw = fs.readFileSync(DATA_FILE, 'utf-8');
             state = JSON.parse(raw);
-            console.log(`[Storage] Dati caricati: ${state.participants.length} partecipanti, stato: ${state.status}`);
+            console.log(`[Storage File] Caricati ${state.participants.length} partecipanti da data.json`);
         }
     } catch (err) {
-        console.error('[Storage] Errore caricamento data.json:', err);
+        console.error('[Storage File] Errore lettura data.json:', err.message);
+    }
+
+    // 2. Se è presente PostgreSQL, inizializza la tabella e carica i dati persistenti
+    if (dbPool) {
+        try {
+            await dbPool.query(`
+                CREATE TABLE IF NOT EXISTS halloween_state (
+                    key VARCHAR(50) PRIMARY KEY,
+                    data JSONB NOT NULL,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            `);
+            console.log('[Database] Tabella halloween_state verificata/creata con successo.');
+
+            const res = await dbPool.query('SELECT data FROM halloween_state WHERE key = $1', ['current']);
+            if (res.rows.length > 0 && res.rows[0].data) {
+                state = res.rows[0].data;
+                console.log(`[Database] Stato recuperato da PostgreSQL: ${state.participants.length} partecipanti, stato: ${state.status}`);
+            } else {
+                console.log('[Database] Nessun dato precedente trovato in PostgreSQL, inizializzo record corrente...');
+                await dbPool.query(
+                    'INSERT INTO halloween_state (key, data) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET data = EXCLUDED.data',
+                    ['current', JSON.stringify(state)]
+                );
+            }
+        } catch (dbErr) {
+            console.error('[Database] Errore connessione/inizializzazione PostgreSQL:', dbErr.message);
+        }
     }
 }
 
-function saveState() {
+// Salva lo stato in modo asincrono (sia su file che su PostgreSQL)
+async function saveState() {
+    // Backup su file
     try {
         fs.writeFileSync(DATA_FILE, JSON.stringify(state, null, 2), 'utf-8');
     } catch (err) {
-        console.error('[Storage] Errore salvataggio data.json:', err);
+        console.error('[Storage File] Errore salvataggio data.json:', err.message);
+    }
+
+    // Salvataggio permanente su Database PostgreSQL
+    if (dbPool) {
+        try {
+            await dbPool.query(
+                `INSERT INTO halloween_state (key, data, updated_at) 
+                 VALUES ($1, $2, NOW()) 
+                 ON CONFLICT (key) 
+                 DO UPDATE SET data = EXCLUDED.data, updated_at = NOW()`,
+                ['current', JSON.stringify(state)]
+            );
+            console.log(`[Database] Stato salvato su PostgreSQL (${state.participants.length} iscritti, status: ${state.status})`);
+        } catch (dbErr) {
+            console.error('[Database] Errore salvataggio su PostgreSQL:', dbErr.message);
+        }
     }
 }
-
-loadState();
 
 // Algoritmo di Catena ad Anello (Hamiltonian Cycle)
 // Garantisce al 100% una corrispondenza 1:1 sia per numeri PARI che DISPARI:
@@ -81,7 +141,7 @@ app.get('/api/status', (req, res) => {
 });
 
 // 2. Registrazione partecipante
-app.post('/api/register', (req, res) => {
+app.post('/api/register', async (req, res) => {
     if (state.status !== 'registration') {
         return res.status(400).json({ error: "Le registrazioni sono chiuse: l'estrazione è già avvenuta!" });
     }
@@ -118,7 +178,7 @@ app.post('/api/register', (req, res) => {
     };
 
     state.participants.push(newParticipant);
-    saveState();
+    await saveState();
 
     res.json({
         success: true,
@@ -211,7 +271,7 @@ app.post('/api/admin/data', (req, res) => {
 });
 
 // 5. Rimuovi partecipante prima del sorteggio
-app.post('/api/admin/remove-participant', (req, res) => {
+app.post('/api/admin/remove-participant', async (req, res) => {
     if (!checkAdmin(req, res)) return;
     if (state.status === 'drawn') {
         return res.status(400).json({ error: "Impossibile rimuovere partecipanti dopo che l'estrazione è avvenuta!" });
@@ -219,13 +279,13 @@ app.post('/api/admin/remove-participant', (req, res) => {
 
     const { id } = req.body;
     state.participants = state.participants.filter(p => p.id !== id);
-    saveState();
+    await saveState();
 
     res.json({ success: true, participantsCount: state.participants.length });
 });
 
 // 6. Esegui il sorteggio (TUTTI PRONTI)
-app.post('/api/admin/start-draw', (req, res) => {
+app.post('/api/admin/start-draw', async (req, res) => {
     if (!checkAdmin(req, res)) return;
 
     if (state.status === 'drawn') {
@@ -243,7 +303,7 @@ app.post('/api/admin/start-draw', (req, res) => {
 
     state.assignments = assignments;
     state.status = 'drawn';
-    saveState();
+    await saveState();
 
     // NOTA: NON restituiamo la mappa degli abbinamenti all'admin!
     // Così l'admin non vede chi è abbinato a chi nemmeno per sbaglio.
@@ -277,7 +337,7 @@ app.post('/api/admin/recover-single', (req, res) => {
 });
 
 // 8. Reset completo evento
-app.post('/api/admin/reset', (req, res) => {
+app.post('/api/admin/reset', async (req, res) => {
     if (!checkAdmin(req, res)) return;
 
     state = {
@@ -285,7 +345,7 @@ app.post('/api/admin/reset', (req, res) => {
         participants: [],
         assignments: {}
     };
-    saveState();
+    await saveState();
 
     res.json({ success: true, message: 'Evento azzerato con successo.' });
 });
@@ -295,7 +355,13 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🎃 Server Halloween in ascolto su porta ${PORT}`);
-    console.log(`🔐 PIN Amministratore predefinito: ${ADMIN_PIN}`);
-});
+// Avvio server con inizializzazione stato DB
+async function startServer() {
+    await initState();
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log(`🎃 Server Halloween in ascolto su porta ${PORT}`);
+        console.log(`🔐 PIN Amministratore predefinito: ${ADMIN_PIN}`);
+    });
+}
+
+startServer();
