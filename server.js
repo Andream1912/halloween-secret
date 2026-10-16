@@ -140,6 +140,37 @@ app.get('/api/status', (req, res) => {
     });
 });
 
+// Verifica credenziali partecipante (funziona sia prima che dopo il sorteggio)
+app.post('/api/verify-participant', (req, res) => {
+    const { nome, cognome, pin } = req.body;
+    if (!nome || !cognome) {
+        return res.status(400).json({ error: 'Inserisci Nome e Cognome.' });
+    }
+
+    const participant = state.participants.find(
+        p => p.nome.toLowerCase() === nome.trim().toLowerCase() &&
+             p.cognome.toLowerCase() === cognome.trim().toLowerCase()
+    );
+
+    if (!participant) {
+        return res.status(404).json({ error: 'Nessun partecipante trovato con questo Nome e Cognome. Controlla e riprova.' });
+    }
+
+    if (participant.pin && (!pin || participant.pin !== pin.trim())) {
+        return res.status(401).json({ error: 'PIN Personale non corretto!' });
+    }
+
+    res.json({
+        success: true,
+        participant: {
+            id: participant.id,
+            nome: participant.nome,
+            cognome: participant.cognome
+        },
+        status: state.status
+    });
+});
+
 // 2. Registrazione partecipante
 app.post('/api/register', async (req, res) => {
     if (state.status !== 'registration') {

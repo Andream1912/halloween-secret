@@ -347,40 +347,45 @@ lookupForm.addEventListener('submit', async (e) => {
         return;
     }
 
-    currentParticipant.nome = nome;
-    currentParticipant.cognome = cognome;
-    currentParticipant.pin = pinVal;
-    currentParticipant.id = null; // Cerchiamo per nome, cognome e PIN
+    try {
+        // 1. Verifichiamo credenziali con il server (funziona sia prima che dopo il sorteggio)
+        const res = await fetch('/api/verify-participant', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nome, cognome, pin: pinVal })
+        });
 
-    const result = await fetchMyVictim();
-    if (result === true) {
-        // Salviamo se valido
-        localStorage.setItem('hw_participant_nome', nome);
-        localStorage.setItem('hw_participant_cognome', cognome);
+        const data = await res.json();
+
+        if (!res.ok) {
+            lookupError.textContent = data.error || 'Credenziali non valide.';
+            lookupError.classList.remove('hidden');
+            return;
+        }
+
+        // Credenziali corrette! Salviamo nel localStorage
+        currentParticipant.id = data.participant.id;
+        currentParticipant.nome = data.participant.nome;
+        currentParticipant.cognome = data.participant.cognome;
+        currentParticipant.pin = pinVal;
+
+        localStorage.setItem('hw_participant_id', data.participant.id);
+        localStorage.setItem('hw_participant_nome', data.participant.nome);
+        localStorage.setItem('hw_participant_cognome', data.participant.cognome);
         localStorage.setItem('hw_participant_pin', pinVal);
-        return;
-    } else if (result && result.error) {
-        lookupError.textContent = result.error;
-        lookupError.classList.remove('hidden');
-        return;
-    }
 
-    // Se l'estrazione non è ancora avvenuta, verifichiamo che esista nei partecipanti
-    const statusRes = await fetch('/api/status');
-    const statusData = await statusRes.json();
-
-    const exists = statusData.participants.some(
-        p => p.nome.toLowerCase() === nome.toLowerCase() && p.cognome.toLowerCase() === cognome.toLowerCase()
-    );
-
-    if (exists) {
-        localStorage.setItem('hw_participant_nome', nome);
-        localStorage.setItem('hw_participant_cognome', cognome);
-        localStorage.setItem('hw_participant_pin', pinVal);
-        updateWaitingScreen(statusData);
-        showScreen(screenWaiting);
-    } else {
-        lookupError.textContent = 'Nessun partecipante trovato con questo Nome e Cognome. Controlla e riprova.';
+        // Se l'estrazione è già avvenuta, sveliamo la carta
+        if (data.status === 'drawn') {
+            await fetchMyVictim();
+        } else {
+            // Se siamo ancora in attesa del via dell'organizzatore, mostriamo la sala d'attesa!
+            const statusRes = await fetch('/api/status');
+            const statusData = await statusRes.json();
+            updateWaitingScreen(statusData);
+            showScreen(screenWaiting);
+        }
+    } catch (err) {
+        lookupError.textContent = 'Errore di connessione al server.';
         lookupError.classList.remove('hidden');
     }
 });
