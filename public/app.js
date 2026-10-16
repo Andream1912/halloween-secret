@@ -414,12 +414,6 @@ if (btnManualUnlock) {
     });
 }
 
-const btnReIdentify = document.getElementById('btn-re-identify');
-if (btnReIdentify) {
-    btnReIdentify.addEventListener('click', () => {
-        showScreen(screenLookup);
-    });
-}
 
 // ANIMAZIONE CARTA 3D
 btnFlipReveal.addEventListener('click', () => {
