@@ -139,7 +139,7 @@ function updateWaitingScreen(data) {
         data.participants.forEach(p => {
             const chip = document.createElement('div');
             chip.className = 'chip';
-            chip.textContent = `${p.nome} ${p.cognome}`;
+            chip.innerHTML = `<span>👻</span> ${escapeHtml(p.nome)} ${escapeHtml(p.cognome)}`;
             waitListChips.appendChild(chip);
         });
     }
@@ -423,6 +423,17 @@ btnFlipReveal.addEventListener('click', () => {
 btnFlipHide.addEventListener('click', () => {
     victimFlipCard.classList.remove('is-flipped');
 });
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+    }[tag] || tag));
+}
 
 // Avvia all'apertura della pagina
 initApp();
