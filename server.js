@@ -424,6 +424,47 @@ app.post('/api/admin/verify-draw', (req, res) => {
     });
 });
 
+// 7.2 Inserimento manuale partecipante nella catena (Sara -> Michele -> Ludovica)
+app.post('/api/admin/insert-in-chain', async (req, res) => {
+    if (!checkAdmin(req, res)) return;
+
+    const sara = state.participants.find(p => p.nome.toLowerCase() === 'sara' && p.cognome.toLowerCase() === 'cavaccini');
+    const ludovica = state.participants.find(p => p.nome.toLowerCase() === 'ludovica' && p.cognome.toLowerCase() === 'casella');
+
+    if (!sara) return res.status(404).json({ error: 'Sara Cavaccini non trovata' });
+    if (!ludovica) return res.status(404).json({ error: 'Ludovica Casella non trovata' });
+
+    let michele = state.participants.find(p => p.nome.toLowerCase() === 'michele' && p.cognome.toLowerCase() === 'meloro');
+    if (!michele) {
+        michele = {
+            id: 'p_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+            nome: 'Michele',
+            cognome: 'Meloro',
+            tagliaMaglia: 'M',
+            tagliaPantaloni: '46 IT',
+            note: '',
+            pin: '2468',
+            createdAt: new Date().toISOString()
+        };
+        state.participants.push(michele);
+    } else {
+        michele.tagliaMaglia = 'M';
+        michele.tagliaPantaloni = '46 IT';
+        michele.pin = '2468';
+    }
+
+    state.assignments[sara.id] = michele.id;
+    state.assignments[michele.id] = ludovica.id;
+
+    await saveState();
+
+    res.json({
+        success: true,
+        message: 'Michele Meloro inserito con successo tra Sara Cavaccini e Ludovica Casella!',
+        totalParticipants: state.participants.length
+    });
+});
+
 // 8. Reset completo evento
 app.post('/api/admin/reset', async (req, res) => {
     if (!checkAdmin(req, res)) return;
