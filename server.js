@@ -367,6 +367,63 @@ app.post('/api/admin/recover-single', (req, res) => {
     });
 });
 
+// 7.1 Verifica Integrità Estrazione (Controllo Matematico 1:1 senza spoiler)
+app.post('/api/admin/verify-draw', (req, res) => {
+    if (!checkAdmin(req, res)) return;
+
+    if (state.status !== 'drawn') {
+        return res.status(400).json({ error: "L'estrazione non è ancora avvenuta." });
+    }
+
+    const participants = state.participants;
+    const assignments = state.assignments || {};
+
+    const givers = Object.keys(assignments);
+    const receivers = Object.values(assignments);
+
+    let selfAssignedCount = 0;
+    const missingParticipants = [];
+    const seenReceivers = new Set();
+    const duplicateReceivers = [];
+
+    participants.forEach(p => {
+        const targetId = assignments[p.id];
+        if (!targetId) {
+            missingParticipants.push(`${p.nome} ${p.cognome}`);
+        } else if (targetId === p.id) {
+            selfAssignedCount++;
+        }
+    });
+
+    receivers.forEach(targetId => {
+        if (seenReceivers.has(targetId)) {
+            duplicateReceivers.push(targetId);
+        }
+        seenReceivers.add(targetId);
+    });
+
+    const isBijective = (
+        givers.length === participants.length &&
+        receivers.length === participants.length &&
+        seenReceivers.size === participants.length &&
+        selfAssignedCount === 0 &&
+        missingParticipants.length === 0
+    );
+
+    res.json({
+        success: true,
+        isDrawn: true,
+        totalParticipants: participants.length,
+        totalGivers: givers.length,
+        totalReceivers: seenReceivers.size,
+        hasSelfAssignment: selfAssignedCount > 0,
+        selfAssignedCount,
+        hasDuplicates: duplicateReceivers.length > 0,
+        isPerfectOneToOne: isBijective,
+        missingParticipants
+    });
+});
+
 // 8. Reset completo evento
 app.post('/api/admin/reset', async (req, res) => {
     if (!checkAdmin(req, res)) return;
